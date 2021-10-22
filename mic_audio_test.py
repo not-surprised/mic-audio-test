@@ -65,7 +65,7 @@ q = queue.Queue()
 def audio_callback(indata, frames, time, status):
     """This is called (from a separate thread) for each audio block."""
     if status:
-        print(status, file=sys.stderr)
+        print(status)
     # Fancy indexing with mapping creates a (necessary!) copy:
     q.put(indata[::args.downsample, mapping])
 
@@ -81,6 +81,15 @@ def update_plot(frame):
     while True:
         try:
             data = q.get_nowait()
+            for p in data:
+                point = p * 100
+                print(point)
+                if point > 6:
+                    print("-----VERY LOUD-----")
+                elif point > 3:
+                    print("-----SOMEWHAT LOUD---")
+                elif point > 1:
+                    print("-----not that loud")
         except queue.Empty:
             break
         shift = len(data)
