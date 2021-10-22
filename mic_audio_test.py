@@ -69,15 +69,6 @@ def audio_callback(indata, frames, time, status):
     # Fancy indexing with mapping creates a (necessary!) copy:
     q.put(indata[::args.downsample, mapping])
 
-
-def update_plot(frame):
-    """This is called by matplotlib for each plot update.
-
-    Typically, audio callbacks happen more frequently than plot updates,
-    therefore the queue tends to contain multiple blocks of audio data.
-
-    """
-    global plotdata
     while True:
         try:
             data = q.get_nowait()
@@ -92,6 +83,20 @@ def update_plot(frame):
                     print("-----not that loud")
         except queue.Empty:
             break
+
+def update_plot(frame):
+    """This is called by matplotlib for each plot update.
+
+    Typically, audio callbacks happen more frequently than plot updates,
+    therefore the queue tends to contain multiple blocks of audio data.
+
+    """
+    global plotdata
+    while True:
+        try:
+            data = q.get_nowait()
+        except queue.Empty:
+            break
         shift = len(data)
         plotdata = np.roll(plotdata, -shift, axis=0)
         plotdata[-shift:, :] = data
@@ -101,6 +106,20 @@ def update_plot(frame):
 
 
 try:
+    while True:
+        try:
+            data = q.get_nowait()
+            for p in data:
+                point = p * 100
+                print(point)
+                if point > 6:
+                    print("-----VERY LOUD-----")
+                elif point > 3:
+                    print("-----SOMEWHAT LOUD---")
+                elif point > 1:
+                    print("-----not that loud")
+        except queue.Empty:
+            break
     if args.samplerate is None:
         device_info = sd.query_devices(args.device, 'input')
         args.samplerate = device_info['default_samplerate']
