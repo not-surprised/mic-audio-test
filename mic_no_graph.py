@@ -21,6 +21,6 @@ def callback(indata, outdata, frames, time, status):
         print(status)
     print(toDecibels(indata))
 
-with sd.Stream(samplerate=1000, latency=1, channels=1, callback=callback):
+with sd.Stream(samplerate=30000, latency=0.75, channels=1, callback=callback):
     while sd.Stream.active:
         callback
