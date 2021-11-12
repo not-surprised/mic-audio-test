@@ -26,7 +26,7 @@ for i in range(num_audio):
     right_col.append([sg.Checkbox("Using headphones", font=(font + " " +body_size))])
     right_col.append([sg.Checkbox("Enable !surprised", font=(font + " " +body_size))])
 
-calibrate_button = [sg.Button('Calibrate', enable_events=True)]
+calibrate_button = [sg.Button('Calibrate', font=(font + " " +body_size), pad=(25, 25))]
 
 
 button_container = [calibrate_button]
