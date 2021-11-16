@@ -1,12 +1,12 @@
 import PySimpleGUIQt as sg
 
-num_displays = 3
-num_audio = 4
+num_displays = 10
+num_audio = 10
 
 font = "Helvetica"
 header_size = "24"
-body_size = "13"
-small_body_size = "9"
+body_size = "14"
+small_body_size = "10"
 
 sg.theme("Dark")
 
@@ -21,19 +21,19 @@ padding = [[sg.Stretch()]]
 left_col = [[sg.Text("\nDisplays\n", font=(font + " " +header_size))]]
 
 for i in range(num_displays):
-    left_col.append([sg.Image(monitor_image, size=(50, 50))])
+    left_col.append([sg.Image(monitor_image)])
     left_col.append([sg.Text("\nDisplay", font=(font + " " +body_size))])
     left_col.append([sg.Text("\n", font=(font + " " + "2"))])
-    left_col.append([sg.Checkbox("Enable !surprised", font=(font + " " +small_body_size))])
-    left_col.append([sg.Text("\n\n", font=(font + " " + body_size))])
+    left_col.append([sg.Checkbox("Enable !surprised", font=(font + " " +small_body_size), size=(20, 1.67))])
+    left_col.append([sg.Text("\n", font=(font + " " + body_size))])
 
 
 right_col = [[sg.Text("\nAudio\n", font=(font + " " +header_size))]]
 
 for i in range(num_audio):
-    right_col.append([sg.Image(speaker_image, size=(50, 50))])
-    right_col.append([sg.Text("\nAudio Device", font=(font + " " +body_size))])
-    left_col.append([sg.Text("\n", font=(font + " " + "2"))])
+    right_col.append([sg.Image(speaker_image)])
+    right_col.append([sg.Text("\nAudio", font=(font + " " +body_size))])
+    right_col.append([sg.Text("\n", font=(font + " " + "2"))])
     right_col.append([sg.Checkbox("Using headphones", font=(font + " " +small_body_size))])
     right_col.append([sg.Checkbox("Enable !surprised", font=(font + " " +small_body_size))])
     right_col.append([sg.Text("\n", font=(font + " " + body_size))])
