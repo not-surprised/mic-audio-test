@@ -15,7 +15,7 @@ volume = cast(interface, POINTER(IAudioEndpointVolume))
 num_displays = 3
 num_audio = 2
 
-font = "Verdana"
+font = "Consolas"
 header_size = "24"
 body_size = "14"
 small_body_size = "10"
@@ -39,7 +39,7 @@ for i in range(num_displays):
                  [sg.Text("Display\n", font=(font + " " + body_size))]]
     settings_col = [[sg.Text("\n", font=(font + " 6"))],
                 [sg.Slider(range=(0, 100), default_value=sbc.get_brightness() * 100, orientation='h', key='display' + str(i), disabled=True)],
-                [sg.Checkbox("Enable !surprised", font=(font + " " + small_body_size), size=(20, 1.75))]]
+                [sg.Checkbox("Enable !surprised", font=(font + " " + small_body_size), size=(30, 1.75))]]
     device_unit = [[sg.Column(image_col, element_justification='c'), sg.Column(settings_col)]]
 
     left_col.append([sg.Column(device_unit)])
@@ -53,7 +53,7 @@ for i in range(num_audio):
                  [sg.Text("Speaker\n", font=(font + " " + body_size))]]
     settings_col = [[sg.Text("\n", font=(font + " 6"))],
                 [sg.Slider(range=(0, 100), default_value=volume.GetMasterVolumeLevelScalar() * 100, orientation='h', key='audio' + str(i), disabled=True)],
-                [sg.Checkbox("Enable !surprised", font=(font + " " + small_body_size), size=(20, 1.25))],
+                [sg.Checkbox("Enable !surprised", font=(font + " " + small_body_size), size=(30, 1.25))],
                 [sg.Checkbox("Headphones", font=(font + " " + small_body_size))]]
     device_unit = [[sg.Column(image_col, element_justification='c'), sg.Column(settings_col)]]
 
