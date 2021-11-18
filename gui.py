@@ -1,65 +1,96 @@
 import PySimpleGUIQt as sg
+import screen_brightness_control as sbc
+from ctypes import cast, POINTER
+from comtypes import CLSCTX_ALL
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
 
-def make_window():
-    num_displays = 10
-    num_audio = 10
 
-    font = 'Consolas'
-    header_font = font + ' 24'
-    body_font = font + ' 14'
-    small_body_font = font + ' 10'
-
-    sg.theme("Dark")
-
-    full_size = (800, 600)  # width, height
-
-    monitor_image = "monitor_image.png"
-    speaker_image = "speaker_image.png"
-
-    left_col = [[sg.Image(monitor_image)], [sg.Text("\nDisplays\n", font=header_font)]]
-
-    for i in range(num_displays):
-        layout = [[sg.Text("\nDisplay", font=body_font)],
-                  [sg.Text("\n", font=(font + " " + "2"))],
-                  [sg.Checkbox("Enable !surprised", font=small_body_font)],
-                  [sg.Text("\n", font=body_font)]]
-        left_col.append([sg.Column(layout)])
-
-    right_col = [[sg.Image(speaker_image)], [sg.Text("\nAudio\n", font=header_font)]]
-
-    for i in range(num_audio):
-        layout = [[sg.Text("\nAudio", font=body_font)],
-                  [sg.Text("\n", font=(font + " " + "2"))],
-                  [sg.Checkbox("Enable !surprised", font=small_body_font)],
-                  [sg.Checkbox("Is speaker", font=small_body_font)],
-                  [sg.Text("\n", font=body_font)]]
-        right_col.append([sg.Column(layout)])
-
-    calibrate_button = [sg.Button('Calibrate', font=body_font, size=(140, 60), button_color=("#bac6d4", "#3f618a"))]
-
-    button_container = [calibrate_button]
-
-    layout = [[sg.Stretch(),
-               sg.Column(left_col, element_justification='l'),
-               sg.Stretch(),
-               sg.Stretch(),
-               sg.Column(right_col, element_justification='l'),
-               sg.Stretch()],
-              [sg.Column(button_container, element_justification='c')]]
-    scrollable = [[sg.Column(layout, size=full_size, scrollable=True)]]
-    return sg.Window("!surprised", scrollable, size=full_size, resizable=False)
+devices = AudioUtilities.GetSpeakers()
+interface = devices.Activate(
+    IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+volume = cast(interface, POINTER(IAudioEndpointVolume))
 
 
-def run():
-    window = make_window()
-    while True:
-        event, values  = window.read()
-        # End program if user closes window or
-        # presses the OK button
-        if event == "Calibrate" or event == sg.WIN_CLOSED:
-            break
+num_displays = 3
+num_audio = 2
+
+font = "Verdana"
+header_size = "24"
+body_size = "14"
+small_body_size = "10"
+
+sg.theme("Dark")
+
+full_size = (1400, 1000) # width, height
+col_size = (600, 450)
+
+monitor_image = "monitor_image.png"
+speaker_image = "speaker_image.png"
+
+padding = [[sg.Stretch()]]
+
+left_col = [[sg.Text("\nDisplays\n", font=(font + " " + header_size))]]
 
 
-if __name__ == "__main__":
-    run()
+for i in range(num_displays):
+
+    image_col = [[sg.Image(monitor_image)], [sg.Text("\n", font=(font + " " + "2"))],
+                 [sg.Text("Display\n", font=(font + " " + body_size))]]
+    settings_col = [[sg.Text("\n", font=(font + " 6"))],
+                [sg.Slider(range=(0, 100), default_value=sbc.get_brightness() * 100, orientation='h', key='display' + str(i), disabled=True)],
+                [sg.Checkbox("Enable !surprised", font=(font + " " + small_body_size), size=(20, 1.75))]]
+    device_unit = [[sg.Column(image_col, element_justification='c'), sg.Column(settings_col)]]
+
+    left_col.append([sg.Column(device_unit)])
+
+
+right_col = [[sg.Text("\nAudio\n", font=(font + " " +header_size))]]
+
+for i in range(num_audio):
+
+    image_col = [[sg.Image(speaker_image)], [sg.Text("\n", font=(font + " " + "2"))],
+                 [sg.Text("Speaker\n", font=(font + " " + body_size))]]
+    settings_col = [[sg.Text("\n", font=(font + " 6"))],
+                [sg.Slider(range=(0, 100), default_value=volume.GetMasterVolumeLevelScalar() * 100, orientation='h', key='audio' + str(i), disabled=True)],
+                [sg.Checkbox("Enable !surprised", font=(font + " " + small_body_size), size=(20, 1.25))],
+                [sg.Checkbox("Headphones", font=(font + " " + small_body_size))]]
+    device_unit = [[sg.Column(image_col, element_justification='c'), sg.Column(settings_col)]]
+
+    right_col.append([sg.Column(device_unit)])
+
+
+calibrate_button = [sg.Button('Calibrate', font=(font + " " + body_size), size=(160, 70), button_color=("#bac6d4", "#3f618a"))]
+
+
+button_container = [calibrate_button]
+
+padding = [[sg.Stretch()]]
+
+layout = [[sg.Stretch(), sg.Column(left_col, element_justification='c'),  sg.Stretch(), sg.Stretch(), sg.Column(right_col, element_justification='c'), sg.Stretch()],
+          [sg.Column(button_container, element_justification='r')]]
+scrollable = [[sg.Column(layout, size=full_size, scrollable=True)]]
+window = sg.Window("!surprised", scrollable, size=full_size, resizable=False)
+
+
+
+
+while True:
+    event, values  = window.read()
+    # End program if user closes window or
+    # presses the OK button
+    last_brightness = 10
+    current_brightness = 50
+    if event == "Calibrate":
+        for i in range(num_displays):
+            slider = window["display" + str(i)]
+            slider.update(sbc.get_brightness())
+        for i in range(num_audio):
+            slider = window["audio" + str(i)]
+            slider.update(volume.GetMasterVolumeLevelScalar() * 100)
+
+    if event == sg.WIN_CLOSED:
+        break
+
+
+
