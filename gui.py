@@ -1,63 +1,65 @@
 import PySimpleGUIQt as sg
 
-num_displays = 10
-num_audio = 10
 
-font = "Helvetica"
-header_size = "24"
-body_size = "14"
-small_body_size = "10"
+def make_window():
+    num_displays = 10
+    num_audio = 10
 
-sg.theme("Dark")
+    font = 'Consolas'
+    header_font = font + ' 24'
+    body_font = font + ' 14'
+    small_body_font = font + ' 10'
 
-full_size = (1400, 1000) # width, height
-col_size = (600, 450)
+    sg.theme("Dark")
 
-monitor_image = "monitor_image.png"
-speaker_image = "speaker_image.png"
+    full_size = (800, 600)  # width, height
 
-padding = [[sg.Stretch()]]
+    monitor_image = "monitor_image.png"
+    speaker_image = "speaker_image.png"
 
-left_col = [[sg.Text("\nDisplays\n", font=(font + " " +header_size))]]
+    left_col = [[sg.Image(monitor_image)], [sg.Text("\nDisplays\n", font=header_font)]]
 
-for i in range(num_displays):
-    left_col.append([sg.Image(monitor_image)])
-    left_col.append([sg.Text("\nDisplay", font=(font + " " +body_size))])
-    left_col.append([sg.Text("\n", font=(font + " " + "2"))])
-    left_col.append([sg.Checkbox("Enable !surprised", font=(font + " " +small_body_size), size=(20, 1.67))])
-    left_col.append([sg.Text("\n", font=(font + " " + body_size))])
+    for i in range(num_displays):
+        layout = [[sg.Text("\nDisplay", font=body_font)],
+                  [sg.Text("\n", font=(font + " " + "2"))],
+                  [sg.Checkbox("Enable !surprised", font=small_body_font)],
+                  [sg.Text("\n", font=body_font)]]
+        left_col.append([sg.Column(layout)])
 
+    right_col = [[sg.Image(speaker_image)], [sg.Text("\nAudio\n", font=header_font)]]
 
-right_col = [[sg.Text("\nAudio\n", font=(font + " " +header_size))]]
+    for i in range(num_audio):
+        layout = [[sg.Text("\nAudio", font=body_font)],
+                  [sg.Text("\n", font=(font + " " + "2"))],
+                  [sg.Checkbox("Enable !surprised", font=small_body_font)],
+                  [sg.Checkbox("Is speaker", font=small_body_font)],
+                  [sg.Text("\n", font=body_font)]]
+        right_col.append([sg.Column(layout)])
 
-for i in range(num_audio):
-    right_col.append([sg.Image(speaker_image)])
-    right_col.append([sg.Text("\nAudio", font=(font + " " +body_size))])
-    right_col.append([sg.Text("\n", font=(font + " " + "2"))])
-    right_col.append([sg.Checkbox("Using headphones", font=(font + " " +small_body_size))])
-    right_col.append([sg.Checkbox("Enable !surprised", font=(font + " " +small_body_size))])
-    right_col.append([sg.Text("\n", font=(font + " " + body_size))])
+    calibrate_button = [sg.Button('Calibrate', font=body_font, size=(140, 60), button_color=("#bac6d4", "#3f618a"))]
 
+    button_container = [calibrate_button]
 
-calibrate_button = [sg.Button('Calibrate', font=(font + " " + body_size), size=(140, 60), button_color=("#bac6d4", "#3f618a"))]
-
-
-button_container = [calibrate_button]
-
-padding = [[sg.Stretch()]]
-
-layout = [[sg.Stretch(), sg.Column(left_col, element_justification='l'), sg.Stretch(), sg.Stretch(), sg.Column(right_col, element_justification='l'), sg.Stretch()],
-          [sg.Column(button_container, element_justification='r')]]
-scrollable = [[sg.Column(layout, size=full_size, scrollable=True)]]
-window = sg.Window("!surprised", scrollable, size=full_size, resizable=False)
-
+    layout = [[sg.Stretch(),
+               sg.Column(left_col, element_justification='l'),
+               sg.Stretch(),
+               sg.Stretch(),
+               sg.Column(right_col, element_justification='l'),
+               sg.Stretch()],
+              [sg.Column(button_container, element_justification='c')]]
+    scrollable = [[sg.Column(layout, size=full_size, scrollable=True)]]
+    return sg.Window("!surprised", scrollable, size=full_size, resizable=False)
 
 
+def run():
+    window = make_window()
+    while True:
+        event, values  = window.read()
+        # End program if user closes window or
+        # presses the OK button
+        if event == "Calibrate" or event == sg.WIN_CLOSED:
+            break
 
-while True:
-    event, values  = window.read()
-    # End program if user closes window or
-    # presses the OK button
-    if event == "Calibrate" or event == sg.WIN_CLOSED:
-        break
 
+if __name__ == "__main__":
+    run()
