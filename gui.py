@@ -1,3 +1,8 @@
+from __future__ import annotations
+from typing import Any
+import re
+from datetime import datetime, timedelta
+
 import PySimpleGUIQt as sg
 import screen_brightness_control as sbc
 from ctypes import cast, POINTER
@@ -5,6 +10,7 @@ from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
 
+# https://docs.microsoft.com/en-us/windows/win32/api/endpointvolume/nn-endpointvolume-iaudioendpointvolume
 devices = AudioUtilities.GetSpeakers()
 interface = devices.Activate(
     IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
@@ -17,10 +23,12 @@ num_audio = 2
 
 
 def make_window():
-    font = 'Verdana'
-    header_font = font + ' 24'
-    body_font = font + ' 14'
-    small_body_font = font + ' 10'
+    def font(size: int):
+        return 'Verdana' + ' ' + str(size)
+
+    header_font = font(24)
+    body_font = font(14)
+    small_body_font = font(10)
 
     sg.theme("Dark")
 
@@ -32,11 +40,13 @@ def make_window():
     left_col = [[sg.Image(monitor_image)], [sg.Text("\nDisplays\n", font=header_font)]]
 
     for i in range(num_displays):
-        image_col = [[sg.Text("\n", font=(font + " " + "2"))],
+        key = 'display' + str(i)
+        image_col = [[sg.Text("\n", font=font(2))],
                      [sg.Text("Display\n", font=body_font)]]
-        settings_col = [[sg.Text("\n", font=(font + " 6"))],
-                        [sg.Slider(range=(0, 100), orientation='h',
-                                   key='display' + str(i), disabled=True)],
+        settings_col = [[sg.Text("\n", font=font(6))],
+                        [sg.Slider(range=(0, 100), orientation='h', key=key,
+                                   disabled=False, enable_events=True),
+                         sg.Text("", key=key + '.text', font=small_body_font)],
                         [sg.Checkbox("Enable !surprised", font=small_body_font, size=(20, 1.75))]]
         device_unit = [[sg.Column(image_col, element_justification='c'), sg.Column(settings_col)]]
         left_col.append([sg.Column(device_unit)])
@@ -44,11 +54,13 @@ def make_window():
     right_col = [[sg.Image(speaker_image)], [sg.Text("\nAudio\n", font=header_font)]]
 
     for i in range(num_audio):
-        image_col = [[sg.Text("\n", font=(font + " " + "2"))],
+        key = 'audio' + str(i)
+        image_col = [[sg.Text("\n", font=font(2))],
                      [sg.Text("Speaker\n", font=body_font)]]
-        settings_col = [[sg.Text("\n", font=(font + " 6"))],
-                        [sg.Slider(range=(0, 100),
-                                   orientation='h', key='audio' + str(i), disabled=True)],
+        settings_col = [[sg.Text("\n", font=font(6))],
+                        [sg.Slider(range=(0, 100), orientation='h', key=key,
+                                   disabled=False, enable_events=True),
+                         sg.Text("", key=key + '.text', font=small_body_font)],
                         [sg.Checkbox("Enable !surprised", font=small_body_font, size=(20, 1.25))],
                         [sg.Checkbox("Is speaker", font=small_body_font)]]
         device_unit = [[sg.Column(image_col, element_justification='c'), sg.Column(settings_col)]]
@@ -77,32 +89,86 @@ def make_tray():
     return tray
 
 
-def read(window, tray, timeout=100):
+def read(window: sg.Window | None, tray: sg.SystemTray, timeout=100) -> tuple[str, dict | None]:
     if window is not None:
         event, values = window.read(timeout / 2)
         if event != sg.TIMEOUT_EVENT:
             return event, values
     event = tray.read(timeout / 2)
-    return event, None
+    return event, {}
 
 
-def refresh_values(window):
+def check_slider_changes(event: str, values: dict[str, int], no_refresh_until: dict[str, datetime]) -> bool:
+    prefix, i = parse_key(event)
+    if prefix == 'display':
+        value = values[event]
+        sbc.set_brightness(value, i)
+    elif prefix == 'audio':
+        value = values[event]
+        volume.SetMasterVolumeLevelScalar(value / 100, None)
+    else:
+        return False
+
+    no_refresh_until[event] = datetime.now() + timedelta(milliseconds=500)
+    return True
+
+
+def refresh_values(window: sg.Window | None, no_refresh_until: dict[str, datetime]):
+    def should_refresh(key):
+        if key in no_refresh_until:
+            if datetime.now() < no_refresh_until[key]:
+                print(key)
+                return False
+            else:
+                del no_refresh_until[key]
+        return True
+
     if window is None:
         return
     for i in range(num_displays):
-        slider = window["display" + str(i)]
-        slider.update(sbc.get_brightness()[i])
+        key = "display" + str(i)
+        if should_refresh(key):
+            slider = window[key]
+            slider.update(sbc.get_brightness()[i])
     for i in range(num_audio):
-        slider = window["audio" + str(i)]
-        slider.update(volume.GetMasterVolumeLevelScalar() * 100)
+        key = "audio" + str(i)
+        if should_refresh(key):
+            slider = window[key]
+            slider.update(volume.GetMasterVolumeLevelScalar() * 100)
+
+
+def update_slider_text(window: sg.Window | None, values: dict[str, int]):
+    def update(key: str):
+        if key in values:
+            value = values[key]
+            window[key + '.text'].update(str(value) + '%')
+
+    if window is None:
+        return
+    for i in range(num_displays):
+        update("display" + str(i))
+    for i in range(num_audio):
+        update("audio" + str(i))
+
+
+def parse_key(key: str) -> tuple[str, int]:
+    match = re.match(r'(.+)([0-9]+)', key)
+    if match is not None:
+        groups = match.groups()
+        return groups[0], int(groups[1])
+    else:
+        return '', -1
 
 
 def run():
     window = make_window()
     tray = make_tray()
+    no_refresh_until = {}
     while True:
         event, values = read(window, tray, 50)
-        refresh_values(window)
+        update_slider_text(window, values)
+        if not check_slider_changes(event, values, no_refresh_until):
+            refresh_values(window, no_refresh_until)
         if event != sg.TIMEOUT_EVENT:
             print(event, values)
             if window is not None:
