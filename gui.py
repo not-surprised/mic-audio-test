@@ -70,9 +70,10 @@ def make_window():
         device_unit = [[sg.Column(image_col, element_justification='c'), sg.Column(settings_col)]]
         right_col.append([sg.Column(device_unit)])
 
-    calibrate_button = [sg.Button('Calibrate', font=body_font, size=(160, 70), button_color=("#bac6d4", "#3f618a"))]
+    calibrate_button = sg.Button('Calibrate', font=body_font, size=(160, 70), button_color=("#dedede", "#3f618a"))
+    clear_buttom = sg.Button('Clear', font=body_font, size=(160, 70), button_color=("#dedede", "#c74d42"))
 
-    button_container = [calibrate_button]
+    button_container = [[sg.Stretch(),clear_buttom, sg.Text("\t"), calibrate_button, sg.Stretch()]]
 
     layout = [[sg.Stretch(),
                sg.Column(left_col, element_justification='c'),
@@ -192,6 +193,8 @@ async def run():
                     window = None
                 if event in ["Calibrate"]:
                     show_popup()
+                if event in ["Clear"]:
+                    pass
             else:
                 if event in ["Configure", sg.EVENT_SYSTEM_TRAY_ICON_DOUBLE_CLICKED]:
                     window = make_window()
