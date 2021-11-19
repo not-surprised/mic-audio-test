@@ -47,7 +47,7 @@ def make_window():
                         [sg.Slider(range=(0, 100), orientation='h', key=key,
                                    disabled=False, enable_events=True),
                          sg.Text("", key=key + '.text', font=small_body_font)],
-                        [sg.Checkbox("Enable !surprised", font=small_body_font, size=(20, 1.75))]]
+                        [sg.Checkbox("Enable !surprised", key=key + '.enabled', enable_events=True, font=small_body_font, size=(20, 1.75))]]
         device_unit = [[sg.Column(image_col, element_justification='c'), sg.Column(settings_col)]]
         left_col.append([sg.Column(device_unit)])
 
@@ -61,8 +61,8 @@ def make_window():
                         [sg.Slider(range=(0, 100), orientation='h', key=key,
                                    disabled=False, enable_events=True),
                          sg.Text("", key=key + '.text', font=small_body_font)],
-                        [sg.Checkbox("Enable !surprised", font=small_body_font, size=(20, 1.25))],
-                        [sg.Checkbox("Is speaker", font=small_body_font)]]
+                        [sg.Checkbox("Enable !surprised", key=key + '.enabled', enable_events=True, font=small_body_font, size=(20, 1.25))],
+                        [sg.Checkbox("Is speaker", key=key + '.speaker', enable_events=True, font=small_body_font)]]
         device_unit = [[sg.Column(image_col, element_justification='c'), sg.Column(settings_col)]]
         right_col.append([sg.Column(device_unit)])
 
@@ -99,8 +99,13 @@ def read(window: sg.Window | None, tray: sg.SystemTray, timeout=100) -> tuple[st
 
 
 def check_slider_changes(event: str, values: dict[str, int], no_refresh_until: dict[str, datetime]) -> bool:
-    prefix, i = parse_key(event)
-    if prefix == 'display':
+    if not event or not values:
+        return False
+
+    prefix, i, suffix = parse_key(event)
+    if suffix:
+        return False
+    elif prefix == 'display':
         value = values[event]
         sbc.set_brightness(value, i)
     elif prefix == 'audio':
@@ -154,13 +159,13 @@ def update_slider_text(window: sg.Window | None, values: dict[str, int]):
         update("audio" + str(i))
 
 
-def parse_key(key: str) -> tuple[str, int]:
-    match = re.match(r'(.+)([0-9]+)', key)
+def parse_key(key: str) -> tuple[str, int, str]:
+    match = re.match(r'^(.+)([0-9]+).?([A-Za-z]*)$', key)
     if match is not None:
         groups = match.groups()
-        return groups[0], int(groups[1])
+        return groups[0], int(groups[1]), groups[2]
     else:
-        return '', -1
+        return '', -1, ''
 
 
 def run():
