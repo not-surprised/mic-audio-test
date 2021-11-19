@@ -24,7 +24,7 @@ num_audio = 2
 
 
 def font(size: int):
-    return 'Verdana' + ' ' + str(size)
+    return 'Consolas' + ' ' + str(size)
 
 
 header_font = font(24)
@@ -51,7 +51,7 @@ def make_window():
                         [sg.Slider(range=(0, 100), orientation='h', key=key,
                                    disabled=False, enable_events=True),
                          sg.Text("", key=key + '.text', font=small_body_font)],
-                        [sg.Checkbox("Enable !surprised", key=key + '.enabled', enable_events=True, font=small_body_font, size=(20, 1.75))]]
+                        [sg.Checkbox("Enable !surprised", key=key + '.enabled', enable_events=True, font=small_body_font, size=(23, 1.75))]]
         device_unit = [[sg.Column(image_col, element_justification='c'), sg.Column(settings_col)]]
         left_col.append([sg.Column(device_unit)])
 
@@ -65,14 +65,15 @@ def make_window():
                         [sg.Slider(range=(0, 100), orientation='h', key=key,
                                    disabled=False, enable_events=True),
                          sg.Text("", key=key + '.text', font=small_body_font)],
-                        [sg.Checkbox("Enable !surprised", key=key + '.enabled', enable_events=True, font=small_body_font, size=(20, 1.25))],
+                        [sg.Checkbox("Enable !surprised", key=key + '.enabled', enable_events=True, font=small_body_font, size=(23, 1.25))],
                         [sg.Checkbox("Is speaker", key=key + '.speaker', enable_events=True, font=small_body_font)]]
         device_unit = [[sg.Column(image_col, element_justification='c'), sg.Column(settings_col)]]
         right_col.append([sg.Column(device_unit)])
 
-    calibrate_button = [sg.Button('Calibrate', font=body_font, size=(160, 70), button_color=("#bac6d4", "#3f618a"))]
+    calibrate_button = sg.Button('Calibrate', font=body_font, size=(160, 70), button_color=("#dedede", "#3f618a"))
+    clear_buttom = sg.Button('Clear', font=body_font, size=(160, 70), button_color=("#dedede", "#c74d42"))
 
-    button_container = [calibrate_button]
+    button_container = [[sg.Stretch(),clear_buttom, sg.Text("\t"), calibrate_button, sg.Stretch()]]
 
     layout = [[sg.Stretch(),
                sg.Column(left_col, element_justification='c'),
@@ -82,18 +83,18 @@ def make_window():
                sg.Stretch()],
               [sg.Column(button_container, element_justification='c')]]
     scrollable = [[sg.Column(layout, size=full_size, scrollable=True)]]
-    window = sg.Window("!surprised", scrollable, size=full_size, resizable=False, disable_minimize=True)
+    window = sg.Window("!surprised", scrollable, size=full_size, icon="logo.png", resizable=False, disable_minimize=True)
     return window
 
 
 def make_tray():
     menu = ['', ['&Configure', '---', 'E&xit']]
     tooltip = '!surprised'
-    tray = sg.SystemTray(menu, tooltip=tooltip, data_base64=sg.DEFAULT_BASE64_ICON)
+    tray = sg.SystemTray(menu, tooltip=tooltip, filename="logo.png")
     return tray
 
 def show_popup():
-    choice, _ = sg.Window('Success!', [[sg.Text('\nCalibration Successful!', font=small_body_font)]], disable_minimize=True, size=(250, 100)).read(close=True)
+    choice, _ = sg.Window('Success!', [[sg.Text('\nCalibration Successful!\n', font=small_body_font)]], disable_minimize=True, resizable=False, icon="logo.png", size=(250, 150)).read(close=True)
 
 def read(window: sg.Window | None, tray: sg.SystemTray, timeout=100) -> tuple[str, dict | None]:
     if window is not None:
@@ -192,6 +193,8 @@ async def run():
                     window = None
                 if event in ["Calibrate"]:
                     show_popup()
+                if event in ["Clear"]:
+                    pass
             else:
                 if event in ["Configure", sg.EVENT_SYSTEM_TRAY_ICON_DOUBLE_CLICKED]:
                     window = make_window()
