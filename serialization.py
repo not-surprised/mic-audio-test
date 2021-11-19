@@ -1,14 +1,12 @@
-def serialize(data: list[list[float]]):
-    lines = [','.join(map(repr, lst)) for lst in data]
+def serialize(data):
     with open('data.csv', 'w') as f:
-        f.write('\n'.join(lines))
+        f.write(repr(data))
 
 
-def deserialize() -> list[list[float]]:
+def deserialize():
     with open('data.csv', 'r') as f:
-        lines = f.readlines()
-    data = [[float(x) for x in line.split(',')] for line in lines]
-    return data
+        text = f.read()
+        return eval(text)
 
 
 if __name__ == '__main__':
