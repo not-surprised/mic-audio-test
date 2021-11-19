@@ -23,17 +23,20 @@ num_displays = len(monitors)
 num_audio = 2
 
 
-def make_window():
-    def font(size: int):
-        return 'Verdana' + ' ' + str(size)
+def font(size: int):
+    return 'Verdana' + ' ' + str(size)
 
-    header_font = font(24)
-    body_font = font(14)
-    small_body_font = font(10)
+
+header_font = font(24)
+body_font = font(14)
+small_body_font = font(10)
+
+def make_window():
+
 
     sg.theme("Dark")
 
-    full_size = (900, 600)  # width, height
+    full_size = (1000, 700)  # width, height
 
     monitor_image = "monitor_image.png"
     speaker_image = "speaker_image.png"
@@ -89,6 +92,8 @@ def make_tray():
     tray = sg.SystemTray(menu, tooltip=tooltip, data_base64=sg.DEFAULT_BASE64_ICON)
     return tray
 
+def show_popup():
+    choice, _ = sg.Window('Success!', [[sg.Text('\nCalibration Successful!', font=small_body_font)]], disable_minimize=True, size=(250, 100)).read(close=True)
 
 def read(window: sg.Window | None, tray: sg.SystemTray, timeout=100) -> tuple[str, dict | None]:
     if window is not None:
@@ -186,7 +191,7 @@ async def run():
                     window.close()
                     window = None
                 if event in ["Calibrate"]:
-                    pass
+                    show_popup()
             else:
                 if event in ["Configure", sg.EVENT_SYSTEM_TRAY_ICON_DOUBLE_CLICKED]:
                     window = make_window()
