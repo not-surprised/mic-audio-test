@@ -32,7 +32,7 @@ def make_window():
 
     sg.theme("Dark")
 
-    full_size = (800, 600)  # width, height
+    full_size = (900, 600)  # width, height
 
     monitor_image = "monitor_image.png"
     speaker_image = "speaker_image.png"
