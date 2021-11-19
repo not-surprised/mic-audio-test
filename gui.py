@@ -92,7 +92,22 @@ def make_tray():
 
 
 def show_popup():
-    choice, _ = sg.Window('Success!', [[sg.Text('\nCalibration Successful!\n', font=small_body_font)]], disable_minimize=True, resizable=False, icon="logo.png", size=(250, 150)).read(close=True)
+    choice, _ = sg.Window('Success!',
+                          [[sg.Text('\nCalibration Successful!\n', font=small_body_font)]],
+                          disable_minimize=True, resizable=False, icon="logo.png", size=(250, 150))\
+        .read(close=True)
+
+
+def show_confirmation():
+    choice, _ = sg.Window('Are you sure?',
+                          [[sg.Text('\nDo you want to clear all calibration data?\n', font=small_body_font)],
+                           [sg.Stretch(),
+                            sg.Button('Yes', font=small_body_font, size=(100, 40), button_color=("#dedede", "#c74d42")),
+                            sg.Button('No',  font=small_body_font, size=(100, 40), button_color=("#dedede", "#3f618a")),
+                            sg.Stretch()]],
+                          disable_minimize=True, resizable=False, icon="logo.png", size=(400, 150))\
+        .read(close=True)
+    return choice == 'Yes'
 
 
 def read(window: sg.Window | None, tray: sg.SystemTray, timeout=100) -> tuple[str, dict | None]:
@@ -193,7 +208,8 @@ async def run():
                 if event in ["Calibrate"]:
                     show_popup()
                 if event in ["Clear"]:
-                    pass
+                    if show_confirmation():
+                        print('boom')
             else:
                 if event in ["Configure", sg.EVENT_SYSTEM_TRAY_ICON_DOUBLE_CLICKED]:
                     window = make_window()
