@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import Any
 import re
 from datetime import datetime, timedelta
 import asyncio
@@ -27,15 +26,13 @@ def font(size: int):
     return 'Consolas' + ' ' + str(size)
 
 
+sg.theme("Dark")
 header_font = font(24)
 body_font = font(14)
 small_body_font = font(10)
 
+
 def make_window():
-
-
-    sg.theme("Dark")
-
     full_size = (1000, 700)  # width, height
 
     monitor_image = "monitor_image.png"
@@ -71,9 +68,9 @@ def make_window():
         right_col.append([sg.Column(device_unit)])
 
     calibrate_button = sg.Button('Calibrate', font=body_font, size=(160, 70), button_color=("#dedede", "#3f618a"))
-    clear_buttom = sg.Button('Clear', font=body_font, size=(160, 70), button_color=("#dedede", "#c74d42"))
+    clear_button = sg.Button('Clear', font=body_font, size=(160, 70), button_color=("#dedede", "#c74d42"))
 
-    button_container = [[sg.Stretch(),clear_buttom, sg.Text("\t"), calibrate_button, sg.Stretch()]]
+    button_container = [[sg.Stretch(), clear_button, sg.Text("\t"), calibrate_button, sg.Stretch()]]
 
     layout = [[sg.Stretch(),
                sg.Column(left_col, element_justification='c'),
@@ -93,8 +90,10 @@ def make_tray():
     tray = sg.SystemTray(menu, tooltip=tooltip, filename="logo.png")
     return tray
 
+
 def show_popup():
     choice, _ = sg.Window('Success!', [[sg.Text('\nCalibration Successful!\n', font=small_body_font)]], disable_minimize=True, resizable=False, icon="logo.png", size=(250, 150)).read(close=True)
+
 
 def read(window: sg.Window | None, tray: sg.SystemTray, timeout=100) -> tuple[str, dict | None]:
     if window is not None:
