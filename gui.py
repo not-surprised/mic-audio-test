@@ -129,7 +129,10 @@ def refresh_values(window: sg.Window | None, no_refresh_until: dict[str, datetim
         key = "display" + str(i)
         if should_refresh(key):
             slider = window[key]
-            slider.update(sbc.get_brightness()[i])
+            if(type(sbc.get_brightness() == 'int')):
+                slider.update(sbc.get_brightness())
+            else:
+                slider.update(sbc.get_brightness()[i])
     for i in range(num_audio):
         key = "audio" + str(i)
         if should_refresh(key):
