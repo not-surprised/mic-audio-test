@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Any
 import re
 from datetime import datetime, timedelta
+import asyncio
 
 import PySimpleGUIQt as sg
 import screen_brightness_control as sbc
@@ -168,12 +169,13 @@ def parse_key(key: str) -> tuple[str, int, str]:
         return '', -1, ''
 
 
-def run():
+async def run():
     window = make_window()
     tray = make_tray()
     no_refresh_until = {}
     while True:
-        event, values = read(window, tray, 50)
+        await asyncio.sleep(0.01)
+        event, values = read(window, tray, 10)
         update_slider_text(window, values)
         if not check_slider_changes(event, values, no_refresh_until):
             refresh_values(window, no_refresh_until)
@@ -197,4 +199,4 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    asyncio.run(run())
