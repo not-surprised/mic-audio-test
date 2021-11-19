@@ -23,7 +23,7 @@ num_audio = 2
 
 
 def font(size: int):
-    return 'Verdana' + ' ' + str(size)
+    return 'Consolas' + ' ' + str(size)
 
 
 header_font = font(24)
@@ -50,7 +50,7 @@ def make_window():
                         [sg.Slider(range=(0, 100), orientation='h', key=key,
                                    disabled=False, enable_events=True),
                          sg.Text("", key=key + '.text', font=small_body_font)],
-                        [sg.Checkbox("Enable !surprised", key=key + '.enabled', enable_events=True, font=small_body_font, size=(20, 1.75))]]
+                        [sg.Checkbox("Enable !surprised", key=key + '.enabled', enable_events=True, font=small_body_font, size=(23, 1.75))]]
         device_unit = [[sg.Column(image_col, element_justification='c'), sg.Column(settings_col)]]
         left_col.append([sg.Column(device_unit)])
 
@@ -64,7 +64,7 @@ def make_window():
                         [sg.Slider(range=(0, 100), orientation='h', key=key,
                                    disabled=False, enable_events=True),
                          sg.Text("", key=key + '.text', font=small_body_font)],
-                        [sg.Checkbox("Enable !surprised", key=key + '.enabled', enable_events=True, font=small_body_font, size=(20, 1.25))],
+                        [sg.Checkbox("Enable !surprised", key=key + '.enabled', enable_events=True, font=small_body_font, size=(23, 1.25))],
                         [sg.Checkbox("Is speaker", key=key + '.speaker', enable_events=True, font=small_body_font)]]
         device_unit = [[sg.Column(image_col, element_justification='c'), sg.Column(settings_col)]]
         right_col.append([sg.Column(device_unit)])
@@ -81,18 +81,18 @@ def make_window():
                sg.Stretch()],
               [sg.Column(button_container, element_justification='c')]]
     scrollable = [[sg.Column(layout, size=full_size, scrollable=True)]]
-    window = sg.Window("!surprised", scrollable, size=full_size, resizable=False, disable_minimize=True)
+    window = sg.Window("!surprised", scrollable, size=full_size, icon="logo.png", resizable=False, disable_minimize=True)
     return window
 
 
 def make_tray():
     menu = ['', ['&Configure', '---', 'E&xit']]
     tooltip = '!surprised'
-    tray = sg.SystemTray(menu, tooltip=tooltip, data_base64=sg.DEFAULT_BASE64_ICON)
+    tray = sg.SystemTray(menu, tooltip=tooltip, filename="logo.png")
     return tray
 
 def show_popup():
-    choice, _ = sg.Window('Success!', [[sg.Text('\nCalibration Successful!', font=small_body_font)]], disable_minimize=True, size=(250, 100)).read(close=True)
+    choice, _ = sg.Window('Success!', [[sg.Text('\nCalibration Successful!\n', font=small_body_font)]], disable_minimize=True, resizable=False, icon="logo.png", size=(250, 150)).read(close=True)
 
 def read(window: sg.Window | None, tray: sg.SystemTray, timeout=100) -> tuple[str, dict | None]:
     if window is not None:
